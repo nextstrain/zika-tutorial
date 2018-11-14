@@ -10,6 +10,7 @@ rule files:
         dropped_strains = "config/dropped_strains.txt",
         reference = "config/zika_outgroup.gb",
         colors = "config/colors.tsv",
+        lat_longs = "config/lat_longs.tsv",
         auspice_config = "config/auspice_config.json"
 
 files = rules.files.params
@@ -176,6 +177,7 @@ rule export:
         nt_muts = rules.ancestral.output.node_data,
         aa_muts = rules.translate.output.node_data,
         colors = files.colors,
+        lat_longs = files.lat_longs,
         auspice_config = files.auspice_config
     output:
         auspice_tree = rules.all.input.auspice_tree,
@@ -187,6 +189,7 @@ rule export:
             --metadata {input.metadata} \
             --node-data {input.branch_lengths} {input.traits} {input.nt_muts} {input.aa_muts} \
             --colors {input.colors} \
+            --lat-longs {input.lat_longs} \
             --auspice-config {input.auspice_config} \
             --output-tree {output.auspice_tree} \
             --output-meta {output.auspice_meta}
