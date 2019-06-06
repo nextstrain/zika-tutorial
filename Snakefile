@@ -3,17 +3,13 @@ rule all:
         auspice_tree = "auspice/zika_tree.json",
         auspice_meta = "auspice/zika_meta.json"
 
-rule files:
-    params:
-        input_fasta = "data/sequences.fasta",
-        input_metadata = "data/metadata.tsv",
-        dropped_strains = "config/dropped_strains.txt",
-        reference = "config/zika_outgroup.gb",
-        colors = "config/colors.tsv",
-        lat_longs = "config/lat_longs.tsv",
-        auspice_config = "config/auspice_config.json"
-
-files = rules.files.params
+input_fasta = "data/sequences.fasta",
+input_metadata = "data/metadata.tsv",
+dropped_strains = "config/dropped_strains.txt",
+reference = "config/zika_outgroup.gb",
+colors = "config/colors.tsv",
+lat_longs = "config/lat_longs.tsv",
+auspice_config = "config/auspice_config.json"
 
 rule filter:
     message:
@@ -24,9 +20,9 @@ rule filter:
           - excluding strains in {input.exclude}
         """
     input:
-        sequences = files.input_fasta,
-        metadata = files.input_metadata,
-        exclude = files.dropped_strains
+        sequences = input_fasta,
+        metadata = input_metadata,
+        exclude = dropped_strains
     output:
         sequences = "results/filtered.fasta"
     params:
@@ -53,7 +49,7 @@ rule align:
         """
     input:
         sequences = rules.filter.output.sequences,
-        reference = files.reference
+        reference = reference
     output:
         alignment = "results/aligned.fasta"
     shell:
@@ -90,7 +86,7 @@ rule refine:
     input:
         tree = rules.tree.output.tree,
         alignment = rules.align.output,
-        metadata = files.input_metadata
+        metadata = input_metadata
     output:
         tree = "results/tree.nwk",
         node_data = "results/branch_lengths.json"
@@ -136,7 +132,7 @@ rule translate:
     input:
         tree = rules.refine.output.tree,
         node_data = rules.ancestral.output.node_data,
-        reference = files.reference
+        reference = reference
     output:
         node_data = "results/aa_muts.json"
     shell:
@@ -152,7 +148,7 @@ rule traits:
     message: "Inferring ancestral traits for {params.columns!s}"
     input:
         tree = rules.refine.output.tree,
-        metadata = files.input_metadata
+        metadata = input_metadata
     output:
         node_data = "results/traits.json",
     params:
@@ -171,14 +167,14 @@ rule export:
     message: "Exporting data files for for auspice"
     input:
         tree = rules.refine.output.tree,
-        metadata = files.input_metadata,
+        metadata = input_metadata,
         branch_lengths = rules.refine.output.node_data,
         traits = rules.traits.output.node_data,
         nt_muts = rules.ancestral.output.node_data,
         aa_muts = rules.translate.output.node_data,
-        colors = files.colors,
-        lat_longs = files.lat_longs,
-        auspice_config = files.auspice_config
+        colors = colors,
+        lat_longs = lat_longs,
+        auspice_config = auspice_config
     output:
         auspice_tree = rules.all.input.auspice_tree,
         auspice_meta = rules.all.input.auspice_meta
