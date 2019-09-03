@@ -28,9 +28,13 @@
     "country",
     "region"
   ],
+  "panels":[
+     "tree",
+     "map"
+  ],
   "defaults": {
     "mapTriplicate": true
-  },  
+  },
   "maintainer": [
     "Trevor Bedford",
     "http://bedford.io/team/trevor-bedford/"
