@@ -1,47 +1,50 @@
 {
-  "title": "Real-time tracking of Zika virus evolution",
-  "color_options": {
-    "gt": {
-      "menuItem": "genotype",
-      "legendTitle": "Genotype",
-      "type": "discrete",
-      "key": "genotype"
+  "title": "Tutorial Nextstrain build for Zika virus",
+  "maintainers": [
+    {"name": "Trevor Bedford", "url": "http://bedford.io/team/trevor-bedford/"}
+  ],
+  "build_url": "https://github.com/nextstrain/zika-tutorial",
+  "colorings": [
+    {
+      "key": "gt",
+      "title": "Genotype",
+      "type": "categorical"
     },
-    "num_date": {
-      "menuItem": "date",
-      "legendTitle": "Sampling date",
-      "type": "continuous",
-      "key": "num_date"
+    {
+      "key": "num_date",
+      "title": "Date",
+      "type": "continuous"
     },
-    "authors": {
-      "key":"authors",
-      "legendTitle":"Authors",
-      "menuItem":"authors",
-      "type":"discrete"
+    {
+      "key": "author",
+      "title": "Author",
+      "type": "categorical"
     },
-    "country": {
+    {
+      "key": "country",
+      "title": "Country",
+      "type": "categorical"
     },
-    "region": {
+    {
+      "key": "region",
+      "title": "Region",
+      "type": "categorical"
     }
-  },
-  "geo": [
+  ],
+  "geo_resolutions": [
     "country",
     "region"
   ],
-  "panels":[
+  "panels": [
      "tree",
      "map"
   ],
-  "defaults": {
-    "mapTriplicate": true
+  "display_defaults": {
+    "map_triplicate": true
   },
-  "maintainer": [
-    "Trevor Bedford",
-    "http://bedford.io/team/trevor-bedford/"
-  ],
   "filters": [
     "country",
     "region",
-    "authors"
+    "author"
   ]
 }
