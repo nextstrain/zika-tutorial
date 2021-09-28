@@ -1,0 +1,21 @@
+{
+  "ZikaTutorial.input_fasta": "data/sequences.fasta",
+  "ZikaTutorial.input_metadata": "data/metadata.tsv",
+  "ZikaTutorial.exclude": "config/dropped_strains.txt",
+  "ZikaTutorial.reference": "config/zika_outgroup.gb",
+  "ZikaTutorial.colors": "config/colors.tsv",
+  "ZikaTutorial.lat_longs": "config/lat_longs.tsv",
+  "ZikaTutorial.auspice_config": "config/auspice_config.json",
+
+  "ZikaTutorial.Filter.group_by": "country year month",
+  "ZikaTutorial.Filter.sequences_per_group": 20,
+  "ZikaTutorial.Filter.min_date": "2012",
+
+  "ZikaTutorial.Refine.coalescent": "opt",
+  "ZikaTutorial.Refine.date_inference": "marginal",
+  "ZikaTutorial.Refine.clock_filter_iqd": 4,
+
+  "ZikaTutorial.Ancestral.inference": "joint",
+
+  "ZikaTutorial.Traits.columns": "region country"
+}
