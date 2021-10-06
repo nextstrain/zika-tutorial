@@ -1,0 +1,6 @@
+version: 1.2
+workflows:
+   - subclass: WDL
+     primaryDescriptorPath: /wdl/zika-tutorial.wdl
+     testParameterFiles:
+     - /wdl/inputs.json
