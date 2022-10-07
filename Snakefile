@@ -203,6 +203,7 @@ rule export:
             --colors {input.colors} \
             --lat-longs {input.lat_longs} \
             --auspice-config {input.auspice_config} \
+            --include-root-sequence \
             --output {output.auspice_json}
         """
 
