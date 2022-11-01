@@ -1,5 +1,7 @@
-# Nextstrain build for Zika virus tutorial
+# Nextstrain build template: arbitrary virus
 
-This repository provides the data and scripts associated with the [Zika virus tutorial](https://nextstrain.org/docs/getting-started/zika-tutorial).
+This repository serves as a template for creating a nextstrain build for an arbitrary viral pathogen of interest.
 
-See the [original Zika build repository](https://github.com/nextstrain/zika) for more about the public build.
+To get started, take a look at config.yml; note that this includes values for all available arguments in the corresponding augur workflow step, including those with reasonable defaults. The parameters which are most important to review before running your workflow are prefaced with tag `## IMPORTANT PARAMETER`.
+
+For a full walkthrough, see the [Zika virus tutorial](https://nextstrain.org/docs/getting-started/zika-tutorial).
