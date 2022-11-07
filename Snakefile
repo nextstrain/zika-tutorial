@@ -15,8 +15,9 @@ flag_alternatives = {
 
 def format_param(rule, param): 
     value = config[rule][param]
+
     if value not in nullish_values:
-        return "--%s"%param.replace("_", "-")
+        return "--%s %s"%(param.replace("_", "-"), value)
     else:
         return None
 
@@ -59,9 +60,6 @@ input_metadata = config['data']['metadata'],
 excluded_strains = config['data']['excluded_strains'],
 included_strains = config['data']['included_strains'],
 reference = config['data']['reference'],
-colors = config['export']['colors'],
-lat_longs = config['export']['lat_longs'],
-auspice_config = config['export']['auspice_config']
 
 rule index_sequences:
     message:
@@ -139,8 +137,8 @@ rule tree:
         """
         augur tree \
             --alignment {input.alignment} \
-            --output {output.tree}
-        """ + format_shell('align')
+            --output {output.tree} \
+        """ + format_shell('tree')
 
 rule refine:
     message:
@@ -154,7 +152,7 @@ rule refine:
         metadata = input_metadata,
         tree = rules.tree.output.tree,
     output:
-        node_data = "results/branch_lengths.json",
+        branch_lengths = "results/branch_lengths.json",
         tree = "results/tree.nwk",
     shell:
         """
@@ -163,8 +161,8 @@ rule refine:
             --alignment {input.alignment} \
             --metadata {input.metadata} \
             --output-tree {output.tree} \
-            --output-node-data {output.node_data} \
-        """ + format_shell('refine')
+            --output-node-data {output.branch_lengths} \
+            """ + format_shell('refine')
 
 rule ancestral:
     message: "Reconstructing ancestral sequences and mutations"
