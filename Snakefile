@@ -96,39 +96,17 @@ rule filter:
     output:
         log = "logs/filter.log",
         sequences = "results/filtered.fasta"
-    params:
-        exclude_where = config['filter']['exclude_where'],
-        exclude_all = format_flag("filter", "exclude_all"),
-        exclude_ambiguous_dates_by = config['filter']['exclude_ambiguous_dates_by'],
-        include_where = config['filter']['include_where'],
-        max_date = config['filter']['max_date'],
-        metadata_chunk_size = config['filter']['metadata_chunk_size'],
-        metadata_id_columns = config['filter']['metadata_id_columns'],
-        min_date = config['filter']['min_date'],
-        min_length = config['filter']['min_length'],
-        non_nucleotide = format_flag("filter", "non_nucleotide"),
     shell:
         """
-        echo {params} &&  \       
         augur filter \
             --sequences {input.sequences} \
             --sequence-index {input.sequence_index} \
             --metadata {input.metadata} \
             --include {input.included_strains} \
-            --include-where {params.include_where} \
             --exclude {input.excluded_strains} \
-            {params.exclude_all} \
-            --exclude-ambiguous-dates-by {params.exclude_ambiguous_dates_by} \
-            --exclude-where {params.exclude_where} \
-            --max-date {params.max_date} \
-            --metadata-chunk-size {params.metadata_chunk_size} \
-            --metadata-id-columns {params.metadata_id_columns} \
-            --min-date {params.min_date} \
-            --min-length {params.min_length} \
-            {params.non_nucleotide} \
             --output-log {output.log}
             --output {output.sequences} \
-        """
+            """ + format_shell('filter')
 
 rule align:
     message:
@@ -141,27 +119,15 @@ rule align:
     output:
         alignment = "results/aligned.fasta"
     params:
-        existing_alignment = config['align']['existing_alignment'],
         debug = '--debug' if config['verbose'] else '',
-        fill_gaps = format_flag('align', 'fill_gaps'),
-        method = config['align']['method'],
-        nthreads = config['nthreads'],
-        reference_name = config['data']['reference_name'],
-        remove_reference = format_flag('align', 'remove_reference'),
     shell:
         """
         augur align \
             {params.debug} \
-            --existing-alignment {params.existing_alignment} \
-            {params.fill_gaps} \
-            --method {params.method} \
-            --nthreads {params.nthreads}
-            --output {output.alignment} \
             --reference-sequence {input.reference} \
-            --reference-name {params.reference_name} \
-            {params.remove_reference} \
             --sequences {input.sequences} \
-        """
+            --output {output.alignment} \
+        """ + format_shell('align')
 
 rule tree:
     message: "Building tree"
@@ -169,23 +135,12 @@ rule tree:
         alignment = rules.align.output.alignment
     output:
         tree = "results/tree_raw.nwk"
-    params:
-        exclude_sites = config['tree']['exclude_sites'],
-        method = config['tree']['method'],
-        nthreads = config['nthreads'],
-        override_default_args = config['tree']['override_default_args'],
-        substitution_model = config['tree']['substitution_model'],
     shell:
         """
         augur tree \
             --alignment {input.alignment} \
-            --exclude-sites {params.exclude_sites} \
-            --method {params.method} \
-            --nthreads {params.nthreads} \
             --output {output.tree}
-            --override-default-args {params.override_default_args} \
-            --substitution-model {params.substitution_model} \
-        """
+        """ + format_shell('align')
 
 rule refine:
     message:
@@ -201,27 +156,6 @@ rule refine:
     output:
         node_data = "results/branch_lengths.json",
         tree = "results/tree.nwk",
-    params:
-        branch_length_inference = config['refine']['branch_length_inference'],
-        clock_filter_iqd = config['refine']['clock_filter_iqd'],
-        clock_rate = config['refine']['clock_rate'],
-        clock_std_dev = config['refine']['clock_std_dev'],
-        coalescent = config['refine']['coalescent'],
-        covariance = format_flag('refine', 'no_covariance', '--covariance'),
-        date_confidence = format_flag('refine', 'date_confidence'),
-        date_format = config['refine']['date_format'],
-        date_inference = config['refine']['date_inference'],
-        divergence_units = config['refine']['divergence_units'],
-        gen_per_year = config['refine']['gen_per_year'],
-        keep_polytomies = format_flag('refine', 'keep_polytomies'),
-        keep_root = format_flag('refine', 'keep_root'),
-        precision = config['refine']['precision'],
-        root = config['refine']['root'],
-        seed = config['refine']['seed'],
-        timetree = format_flag('refine', 'timetree'),
-        use_fft = format_flag('refine', 'use_fft'),
-        year_bounds = config['refine']['year_bounds'],
-        verbosity = 6 if config['verbose'] else 0
     shell:
         """
         augur refine \
@@ -230,27 +164,7 @@ rule refine:
             --metadata {input.metadata} \
             --output-tree {output.tree} \
             --output-node-data {output.node_data} \
-            --branch_length_inference {params.branch_length_inference} \
-            --clock-filter-iqd {params.clock_filter_iqd} \
-            --clock-rate {params.clock_rate} \
-            --clock-std-dev {params.clock_std_dev} \
-            --coalescent {params.coalescent} \
-            {params.covariance} \
-            {params.date_confidence} \
-            --date-format {params.date_format} \
-            --date-inference {params.date_inference} \
-            --divergence-units {params.divergence_units} \
-            --gen-per-year {params.gen_per_year} \
-            {params.keep_polytomies} \
-            {params.keep_root} \
-            --precision {params.precision} \
-            --root {params.root} \
-            --seed {params.seed} \
-            {params.timetree} \
-            {params.use_fft} \
-            --year-bounds {params.year_bounds} \
-            --verbosity {params.verbosity} \
-        """
+        """ + format_shell('refine')
 
 rule ancestral:
     message: "Reconstructing ancestral sequences and mutations"
@@ -259,21 +173,13 @@ rule ancestral:
         alignment = rules.align.output
     output:
         node_data = "results/nt_muts.json"
-    params:
-        inference = config['ancestral']['inference'],
-        infer_ambiguous = format_flag('ancestral', 'infer_ambiguous', '--keep-ambiguous'),
-        keep_overhangs = format_flag('ancestral', 'keep_overhangs'),
-
     shell:
         """
         augur ancestral \
             --tree {input.tree} \
             --alignment {input.alignment} \
             --output-node-data {output.node_data} \
-            --inference {params.inference}
-            {params.infer_ambiguous} \
-            {params.keep_overhangs} \
-        """
+        """ + format_shell('ancestral')
 
 rule translate:
     message: "Translating amino acid sequences"
@@ -293,29 +199,19 @@ rule translate:
         """
 
 rule traits:
-    message: "Inferring ancestral traits for {params.columns!s}"
+    message: "Inferring ancestral traits"
     input:
         tree = rules.refine.output.tree,
         metadata = input_metadata
     output:
         node_data = "results/traits.json",
-    params:
-        columns = config['traits']['columns'],
-        confidence = format_flag('traits', 'confidence'),
-        sampling_bias_correction = config['traits']['sampling_bias_correction'],
-        weights = config['traits']['weights'],
-
     shell:
         """
         augur traits \
             --tree {input.tree} \
             --metadata {input.metadata} \
             --output-node-data {output.node_data} \
-            --columns {params.columns} \
-            {params.confidence} \
-            --sampling-bias-correction {params.sampling_bias_correction} \
-            --weights {params.weights} \
-        """
+        """ + format_shell('traits')
 
 rule export:
     message: "Exporting data files for for auspice"
@@ -328,41 +224,14 @@ rule export:
         aa_muts = rules.translate.output.node_data,
     output:
         auspice_json = rules.all.input.auspice_json,
-    params: 
-        auspice_config = config['export']['auspice_config'],
-        build_url = config['export']['build_url'],
-        colors = config['export']['colors'],
-        color_by_metadata = config['export']['color_by_metadata'],
-        description = config['export']['description'],
-        geo_resolutions = config['export']['geo_resolutions'],
-        include_root_sequence = config['export']['include_root_sequence'],
-        lat_longs = config['export']['lat_longs'],
-        maintainers = config['export']['maintainers'],
-        minify_json = format_flag('export', 'minify_json'),
-        panels = config['export']['panels'],
-        skip_validation = format_flag('export', 'skip_validation'),
-        title = config['export']['title'],
     shell:
         """
         augur export v2 \
-            --auspice-config {params.auspice_config} \
-            --build-url {params.build_url} \
-            --colors {params.colors} \
-            --color-by-metadata {params.color_by_metadata} \
-            --description {params.description} \
-            --geo-resolutions {params.geo_resolutions} \
-            --include-root-sequence \
-            --lat-longs {params.lat_longs} \
-            --maintainers {params.maintainers} \
             --metadata {input.metadata} \
-            {params.minify_json} \
             --node-data {input.branch_lengths} {input.traits} {input.nt_muts} {input.aa_muts} \
             --output {output.auspice_json}
-            --panels {params.panels} \
-            {params.skip_validation} \
-            --title {params.title} \
             --tree {input.tree} \
-        """
+        """ + format_shell('export')
 
 rule clean:
     message: "Removing directories: {params}"

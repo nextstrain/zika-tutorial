@@ -19,15 +19,15 @@ filter:
   max_date: null,
   include_where: null,
   exclude_where: null,
-  exclude_all: False,
+  exclude_all_FLAG: False,
   exclude_ambiguous_dates_by: null,
   min_length: 9000, ## IMPORTANT PARAMETER - recommend 90% of the total genome length
-  non_nucleotide: False,
+  non_nucleotide_FLAG: False,
 
 align:
   method: "mafft"
-  remove_reference: False,
-  fill_gaps: True,
+  remove_reference_FLAG: False,
+  fill_gaps_FLAG: True,
   existing_alignment: null,
 
 tree:
@@ -42,30 +42,30 @@ refine:
   clock_rate: null,
   clock_std_dev: null,
   coalescent: null,
-  covariance: True,
-  date_confidence: False,
+  covariance_FLAG: True,
+  date_confidence_FLAG: False,
   date_format: "%Y-%m-%d"
   date_inference: "joint"
   divergence_units: "mutations"
   gen_per_year: null,
-  keep_polytomies: True,
-  keep_root: False,
+  keep_polytomies_FLAG: True,
+  keep_root_FLAG: False,
   no_covariance: False,
   precision: "auto"
   root: "best"
   seed: null,
-  timetree: True,
-  use_fft: False,
+  timetree_FLAG: True,
+  use_fft_FLAG: False,
   year_bounds: null,
 
 ancestral:
   inference: "joint"
-  infer_ambiguous: True,
-  keep_overhangs: False,
+  infer_ambiguous_FLAG: True,
+  keep_overhangs_FLAG: False,
 
 traits:
   columns: "region country" # IMPORTANT PARAMETER - want to infer how metadata traits have changed over time (e.g., geographic movement)? Put the field name(s) here.
-  confidence: null,
+  confidence_FLAG: null,
   sampling_bias_correction: null,
   weights: null,
 
@@ -79,7 +79,7 @@ export:
   include_root_sequence: False,
   lat_longs: null,
   maintainers: "Your name here <https://your-url-here>" # IMPORTANT PARAMETER - who are you, and where can people find you on the web? :)
-  minify_json: False,
+  minify_json_FLAG: False,
   panels: null,
-  skip_validation: False,
+  skip_validation_FLAG: False,
   title: "Tutorial Nextstrain build for Zika virus" # IMPORTANT PARAMETER - title
