@@ -98,6 +98,8 @@ rule filter:
     output:
         log = "logs/filter.log",
         sequences = "results/filtered.fasta"
+    params:
+        allParams = format_config_params('filter')
     shell:
         """
         augur filter \
@@ -106,9 +108,10 @@ rule filter:
             --metadata {input.metadata} \
             --include {input.included_strains} \
             --exclude {input.excluded_strains} \
-            --output-log {output.log}
+            --output-log {output.log} \
             --output {output.sequences} \
-            """ + format_shell('filter')
+            {params.allParams}
+            """
 
 rule align:
     message:
@@ -122,14 +125,16 @@ rule align:
         alignment = "results/aligned.fasta"
     params:
         debug = '--debug' if config['verbose'] else '',
+        allParams = format_config_params('align')
     shell:
         """
         augur align \
-            {params.debug} \
             --reference-sequence {input.reference} \
             --sequences {input.sequences} \
             --output {output.alignment} \
-        """ + format_shell('align')
+            {params.debug} \
+            {params.allParams}
+            """
 
 rule tree:
     message: "Building tree"
@@ -137,13 +142,15 @@ rule tree:
         alignment = rules.align.output.alignment
     output:
         tree = "results/tree_raw.nwk"
+    params:
+        allParams = format_config_params('tree')
     shell:
         """
         augur tree \
             --alignment {input.alignment} \
             --output {output.tree} \
-        """ + format_shell('tree')
-
+            {params.allParams}
+            """
 rule refine:
     message:
         """
@@ -158,6 +165,8 @@ rule refine:
     output:
         branch_lengths = "results/branch_lengths.json",
         tree = "results/tree.nwk",
+    params:
+        allParams = format_config_params('refine')
     shell:
         """
         augur refine \
@@ -166,7 +175,8 @@ rule refine:
             --metadata {input.metadata} \
             --output-tree {output.tree} \
             --output-node-data {output.branch_lengths} \
-            """ + format_shell('refine')
+            {params.allParams}
+        """ 
 
 rule ancestral:
     message: "Reconstructing ancestral sequences and mutations"
@@ -174,31 +184,37 @@ rule ancestral:
         tree = rules.refine.output.tree,
         alignment = rules.align.output
     output:
-        node_data = "results/nt_muts.json"
+        nt_muts = "results/nt_muts.json"
+    params:
+        allParams = format_config_params('ancestral')
     shell:
         """
         augur ancestral \
             --tree {input.tree} \
             --alignment {input.alignment} \
-            --output-node-data {output.node_data} \
-        """ + format_shell('ancestral')
+            --output-node-data {output.nt_muts} \
+            {params.allParams}
+        """ 
 
 rule translate:
     message: "Translating amino acid sequences"
     input:
         tree = rules.refine.output.tree,
-        node_data = rules.ancestral.output.node_data,
+        nt_muts = rules.ancestral.output.nt_muts,
         reference = reference
     output:
-        node_data = "results/aa_muts.json"
+        aa_muts = "results/aa_muts.json"
+    # params:
+    #     allParams = format_config_params('translate')
     shell:
         """
         augur translate \
-            --ancestral-sequences {input.node_data} \
-            --output-node-data {output.node_data} \
+            --ancestral-sequences {input.nt_muts} \
+            --output-node-data {output.aa_muts} \
             --reference-sequence {input.reference} \
             --tree {input.tree} \
         """
+        # {params.allParams}
 
 rule traits:
     message: "Inferring ancestral traits"
@@ -206,34 +222,40 @@ rule traits:
         tree = rules.refine.output.tree,
         metadata = input_metadata
     output:
-        node_data = "results/traits.json",
+        traits = "results/traits.json",
+    params:
+        allParams = format_config_params('traits')
     shell:
         """
         augur traits \
             --tree {input.tree} \
             --metadata {input.metadata} \
-            --output-node-data {output.node_data} \
-        """ + format_shell('traits')
+            --output-node-data {output.traits} \
+            {params.allParams}
+        """
 
 rule export:
     message: "Exporting data files for for auspice"
     input:
         tree = rules.refine.output.tree,
         metadata = input_metadata,
-        branch_lengths = rules.refine.output.node_data,
-        traits = rules.traits.output.node_data,
-        nt_muts = rules.ancestral.output.node_data,
-        aa_muts = rules.translate.output.node_data,
+        branch_lengths = rules.refine.output.branch_lengths,
+        traits = rules.traits.output.traits,
+        nt_muts = rules.ancestral.output.nt_muts,
+        aa_muts = rules.translate.output.aa_muts,
     output:
         auspice_json = rules.all.input.auspice_json,
+    params:
+        allParams = format_config_params('export')
     shell:
         """
         augur export v2 \
+            --tree {input.tree} \
             --metadata {input.metadata} \
             --node-data {input.branch_lengths} {input.traits} {input.nt_muts} {input.aa_muts} \
-            --output {output.auspice_json}
-            --tree {input.tree} \
-        """ + format_shell('export')
+            --output {output.auspice_json} \
+            {params.allParams}
+        """ 
 
 rule clean:
     message: "Removing directories: {params}"
