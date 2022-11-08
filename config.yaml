@@ -39,29 +39,32 @@ tree:
 refine:
   branch_length_inference: "auto"
   clock_filter_iqd: 5
-  # clock_rate: null
-  # clock_std_dev: null
-  # coalescent: null
   covariance_FLAG: True
   date_confidence_FLAG: False
   date_format: "%Y-%m-%d"
   date_inference: "joint"
   divergence_units: "mutations"
-  # gen_per_year: null
   keep_polytomies_FLAG: True
-  # keep_root_FLAG: False
-  # no_covariance: False
-  precision: "auto"
   root: "best"
-  # seed: null
   timetree_FLAG: True
   use_fft_FLAG: False
+  # clock_rate: null
+  # clock_std_dev: null
+  # coalescent: null
+  # gen_per_year: null
+  # keep_root_FLAG: False
+  # no_covariance: False
+  # precision: null
+  # seed: null
   # year_bounds: null
 
 ancestral:
   inference: "joint"
   infer_ambiguous_FLAG: True
   # keep_overhangs_FLAG: False
+
+translate:
+  # genes: null
 
 traits:
   columns: "region country" # IMPORTANT PARAMETER - want to infer how metadata traits have changed over time (e.g. geographic movement)? Put the field name(s) here.
