@@ -30,6 +30,12 @@ align:
   # remove_reference_FLAG: False
   # existing_alignment: null
 
+mask:
+  mask_from_beginning: 100 # IMPORTANT PARAMETER - which sites in the alignment should be masked?
+  mask_from_end: 100
+  mask_terminal_gaps_FLAG: True
+  # mask_sites: null
+
 tree:
   method: "iqtree"
   substitution_model: "GTR"

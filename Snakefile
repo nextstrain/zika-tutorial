@@ -136,10 +136,29 @@ rule align:
             {params.allParams}
             """
 
+rule mask:
+    message:
+        """
+        Mask bases in alignment by converting `-` to `N`
+        """
+    input:
+        alignment = rules.align.output.alignment
+    output:
+        alignment = "results/masked_alignment.fasta"
+    params:
+        allParams = format_config_params('mask')
+    shell:
+        """
+        python3 helper_scripts/mask-alignment.py \
+            --alignment {input.alignment} \
+            --output {output.alignment} \
+            {params.allParams}
+        """
+
 rule tree:
     message: "Building tree"
     input:
-        alignment = rules.align.output.alignment
+        alignment = rules.mask.output.alignment
     output:
         tree = "results/tree_raw.nwk"
     params:
@@ -159,7 +178,7 @@ rule refine:
           - [if selected] estimating treetime 
         """
     input:
-        alignment = rules.align.output,
+        alignment = rules.mask.output,
         metadata = input_metadata,
         tree = rules.tree.output.tree,
     output:
@@ -182,7 +201,7 @@ rule ancestral:
     message: "Reconstructing ancestral sequences and mutations"
     input:
         tree = rules.refine.output.tree,
-        alignment = rules.align.output
+        alignment = rules.mask.output
     output:
         nt_muts = "results/nt_muts.json"
     params:
