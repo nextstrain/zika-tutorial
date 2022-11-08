@@ -24,33 +24,37 @@ def format_param(rule, param):
 def format_flag(rule, param): 
     value = config[rule][param]
     param = param.split('_FLAG')[0]
-    if value not in nullish_values:
+
+    if value not in nullish_values: # any truth-y value -> include flag
         return "--%s"%param.replace("_", "-")
-    elif rule in flag_alternatives.keys() and param in flag_alternatives[rule].keys():
+
+    elif rule in flag_alternatives.keys() and param in flag_alternatives[rule].keys(): # a couple of args have 'inverse' flags 
         alternative = flag_alternatives[rule][param]
         return "--%s"%alternative.replace("_", "-")
-    else:
+    
+    else: # false-y value -> don't include flag
         return None
 
-def format_shell(rule): 
+def format_config_params(rule): 
     params = []
-    if rule not in config.keys():
+
+    if rule not in config.keys(): ## check the rule exists in the config file
         raise Exception("Rule %s parameters not found in config file" % rule)
+
     for param in config[rule].keys():
-        if param.endswith('_FLAG'):
-            formattedFlag = params.append(format_flag(rule, param))
-            if formattedFlag:
+        if param.endswith('_FLAG'): ## format flags 
+            formattedFlag = format_flag(rule, param)
+            if formattedFlag is not None:
                 params.append(formattedFlag)
-        else:
-            formattedParam = params.append(format_param(rule, param))
-            if formattedParam:
+
+        else: ## format other parameters
+            formattedParam = format_param(rule, param)
+            if formattedParam is not None:
                 params.append(formattedParam)
-    returnValue = " ".join(params)
-    print(returnValue)
-    return returnValue
+
+    return " ".join(params)
 
 # MAIN WORKFLOW
-
 rule all:
     input:
         auspice_json = "results/{config.virus}.json",
