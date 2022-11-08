@@ -1,6 +1,5 @@
 configfile: "./config.yaml"
 
-
 # HELPER FUNCTIONS 
 nullish_values = [None, 'null', '', 'None', False]
 
@@ -54,10 +53,12 @@ def format_config_params(rule):
 
     return " ".join(params)
 
+
 # MAIN WORKFLOW
+
 rule all:
     input:
-        auspice_json = "results/{config.virus}.json",
+        auspice_json = f"results/{config['virus']}.json",
 
 input_fasta = config['data']['sequences'],
 input_metadata = config['data']['metadata'],
