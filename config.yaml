@@ -69,17 +69,5 @@ traits:
   # sampling_bias_correction: null
   # weights: null
 
-export:
-  color_by_metadata: "region country division location gt num_date author" # IMPORTANT PARAMETER - which metadata fields should be offered as color-by options?
-  geo_resolutions: "region country division location"
-  include_root_sequence: False
-  maintainers: "Your name here <https://your-url-here>" # IMPORTANT PARAMETER - who are you and where can people find you on the web? :)
-  title: "Tutorial Nextstrain build for Zika virus" # IMPORTANT PARAMETER - title
-  # auspice_config: null
-  # build_url: null
-  # colors: null
-  # description: null
-  # lat_longs: null
-  # minify_json_FLAG: False
-  # panels: null
-  # skip_validation_FLAG: False
+export: # IMPORTANT PARAMETERS for customizing display contained in the additional config file, auspice_config.json
+  auspice_config: "auspice_config.json"
