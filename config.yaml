@@ -13,22 +13,22 @@ data: ## IMPORTANT PARAMETERS - paths should be relative to the tutorial directo
   reference_name: "PF13/251013_18" # IMPORTANT PARAMETER - fill in the name of the reference sequence
 
 filter:
-  metadata_chunk_size: 100000
-  metadata_id_columns: "strain name"
   min_length: 9000 ## IMPORTANT PARAMETER - recommend 90% of the total genome length
-  # min_date: null
-  # max_date: null
   # include_where: null
   # exclude_where: null
   # exclude_all_FLAG: False
   # exclude_ambiguous_dates_by: null
   # non_nucleotide_FLAG: False
+  # metadata_chunk_size: 100000
+  # metadata_id_columns: "strain name"
+  # min_date: null
+  # max_date: null
 
 align:
-  method: "mafft"
   fill_gaps_FLAG: True
-  # remove_reference_FLAG: False
   # existing_alignment: null
+  # method: "mafft"
+  # remove_reference_FLAG: False
 
 mask:
   mask_from_beginning: 100 # IMPORTANT PARAMETER - which sites in the alignment should be masked?
@@ -37,23 +37,23 @@ mask:
   # mask_sites: null
 
 tree:
-  method: "iqtree"
-  substitution_model: "GTR"
   # exclude_sites: null
+  # method: "iqtree"
   # override_default_args: False
+  # substitution_model: "GTR"
 
 refine:
-  branch_length_inference: "auto"
   clock_filter_iqd: 5
-  covariance_FLAG: True
-  date_confidence_FLAG: False
-  date_format: "%Y-%m-%d"
-  date_inference: "joint"
   divergence_units: "mutations"
   keep_polytomies_FLAG: True
-  root: "best"
   timetree_FLAG: True
-  use_fft_FLAG: False
+  # branch_length_inference: "auto"
+  # covariance_FLAG: True
+  # date_confidence_FLAG: False
+  # date_format: "%Y-%m-%d"
+  # date_inference: "joint"
+  # root: "best"
+  # use_fft_FLAG: False
   # clock_rate: null
   # clock_std_dev: null
   # coalescent: null
@@ -65,8 +65,8 @@ refine:
   # year_bounds: null
 
 ancestral:
-  inference: "joint"
-  infer_ambiguous_FLAG: True
+  # inference: "joint"
+  # infer_ambiguous_FLAG: True
   # keep_overhangs_FLAG: False
 
 translate:
