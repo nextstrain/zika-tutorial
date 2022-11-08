@@ -1,0 +1,82 @@
+virus: "zika" ## IMPORTANT PARAMETER - used to name outputs
+
+verbose: false
+
+nthreads: 4 ## IMPORTANT PARAMETER - how many CPUs available?
+
+data: ## IMPORTANT PARAMETERS - paths should be relative to the tutorial directory
+  sequences: "data/sequences.fasta"
+  metadata: "data/metadata.tsv"
+  excluded_strains: "data/excluded_strains.txt"
+  included_strains: "data/included_strains.txt"
+  reference: "data/reference.gb"
+  reference_name: "PF13/251013_18" # IMPORTANT PARAMETER - fill in the name of the reference sequence
+
+filter:
+  min_length: 9000 ## IMPORTANT PARAMETER - recommend 90% of the total genome length
+  # include_where: null
+  # exclude_where: null
+  # exclude_all_FLAG: False
+  # exclude_ambiguous_dates_by: null
+  # non_nucleotide_FLAG: False
+  # metadata_chunk_size: 100000
+  # metadata_id_columns: "strain name"
+  # min_date: null
+  # max_date: null
+
+align:
+  fill_gaps_FLAG: True
+  # existing_alignment: null
+  # method: "mafft"
+  # remove_reference_FLAG: False
+
+mask:
+  mask_from_beginning: 100 # IMPORTANT PARAMETER - which sites in the alignment should be masked?
+  mask_from_end: 100
+  mask_terminal_gaps_FLAG: True
+  # mask_sites: null
+
+tree:
+  # exclude_sites: null
+  # method: "iqtree"
+  # override_default_args: False
+  # substitution_model: "GTR"
+
+refine:
+  clock_filter_iqd: 5
+  divergence_units: "mutations"
+  keep_polytomies_FLAG: True
+  timetree_FLAG: True
+  # branch_length_inference: "auto"
+  # covariance_FLAG: True
+  # date_confidence_FLAG: False
+  # date_format: "%Y-%m-%d"
+  # date_inference: "joint"
+  # root: "best"
+  # use_fft_FLAG: False
+  # clock_rate: null
+  # clock_std_dev: null
+  # coalescent: null
+  # gen_per_year: null
+  # keep_root_FLAG: False
+  # no_covariance: False
+  # precision: null
+  # seed: null
+  # year_bounds: null
+
+ancestral:
+  # inference: "joint"
+  # infer_ambiguous_FLAG: True
+  # keep_overhangs_FLAG: False
+
+translate:
+  # genes: null
+
+traits:
+  columns: "region country" # IMPORTANT PARAMETER - want to infer how metadata traits have changed over time (e.g. geographic movement)? Put the field name(s) here.
+  # confidence_FLAG: null
+  # sampling_bias_correction: null
+  # weights: null
+
+export: # IMPORTANT PARAMETERS for customizing display contained in the additional config file, auspice_config.json
+  auspice_config: "auspice_config.json"

@@ -1,14 +1,69 @@
+configfile: "./config.yaml"
+
+# HELPER FUNCTIONS 
+nullish_values = [None, 'null', '', 'None', False]
+
+flag_alternatives = {
+    "refine": {
+        "covariance": "no_covariance",
+    },
+    "ancestral": {
+        "infer_ambiguous": "keep_ambiguous"
+    }
+}
+
+def format_param(rule, param): 
+    value = config[rule][param]
+
+    if value not in nullish_values:
+        return "--%s %s"%(param.replace("_", "-"), value)
+    else:
+        return None
+
+def format_flag(rule, param): 
+    value = config[rule][param]
+    param = param.split('_FLAG')[0]
+
+    if value not in nullish_values: # any truth-y value -> include flag
+        return "--%s"%param.replace("_", "-")
+
+    elif rule in flag_alternatives.keys() and param in flag_alternatives[rule].keys(): # a couple of args have 'inverse' flags 
+        alternative = flag_alternatives[rule][param]
+        return "--%s"%alternative.replace("_", "-")
+    
+    else: # false-y value -> don't include flag
+        return None
+
+def format_config_params(rule): 
+    params = []
+    if rule not in config.keys() or config[rule] is None: ## check the rule exists in the config file
+        return ""
+
+    for param in config[rule].keys():
+        if param.endswith('_FLAG'): ## format flags 
+            formattedFlag = format_flag(rule, param)
+            if formattedFlag is not None:
+                params.append(formattedFlag)
+
+        else: ## format other parameters
+            formattedParam = format_param(rule, param)
+            if formattedParam is not None:
+                params.append(formattedParam)
+
+    return " ".join(params)
+
+
+# MAIN WORKFLOW
+
 rule all:
     input:
-        auspice_json = "auspice/zika.json",
+        auspice_json = f"results/{config['virus']}.json",
 
-input_fasta = "data/sequences.fasta",
-input_metadata = "data/metadata.tsv",
-dropped_strains = "config/dropped_strains.txt",
-reference = "config/zika_outgroup.gb",
-colors = "config/colors.tsv",
-lat_longs = "config/lat_longs.tsv",
-auspice_config = "config/auspice_config.json"
+input_fasta = config['data']['sequences'],
+input_metadata = config['data']['metadata'],
+excluded_strains = config['data']['excluded_strains'],
+included_strains = config['data']['included_strains'],
+reference = config['data']['reference'],
 
 rule index_sequences:
     message:
@@ -19,98 +74,118 @@ rule index_sequences:
         sequences = input_fasta
     output:
         sequence_index = "results/sequence_index.tsv"
+    params:
+        verbose = '--verbose' if config['verbose'] else '',
     shell:
         """
         augur index \
             --sequences {input.sequences} \
             --output {output.sequence_index}
+            {params.verbose}
         """
 
 rule filter:
     message:
         """
-        Filtering to
-          - {params.sequences_per_group} sequence(s) per {params.group_by!s}
-          - from {params.min_date} onwards
-          - excluding strains in {input.exclude}
+        Filtering strains
         """
     input:
+        excluded_strains = excluded_strains,
+        included_strains = included_strains,        
+        metadata = input_metadata,
         sequences = input_fasta,
         sequence_index = "results/sequence_index.tsv",
-        metadata = input_metadata,
-        exclude = dropped_strains
     output:
+        log = "logs/filter.log",
         sequences = "results/filtered.fasta"
     params:
-        group_by = "country year month",
-        sequences_per_group = 20,
-        min_date = 2012
+        allParams = format_config_params('filter')
     shell:
         """
         augur filter \
             --sequences {input.sequences} \
             --sequence-index {input.sequence_index} \
             --metadata {input.metadata} \
-            --exclude {input.exclude} \
+            --include {input.included_strains} \
+            --exclude {input.excluded_strains} \
+            --output-log {output.log} \
             --output {output.sequences} \
-            --group-by {params.group_by} \
-            --sequences-per-group {params.sequences_per_group} \
-            --min-date {params.min_date}
-        """
+            {params.allParams}
+            """
 
 rule align:
     message:
         """
-        Aligning sequences to {input.reference}
-          - filling gaps with N
+        Aligning sequences
         """
     input:
+        reference = reference,
         sequences = rules.filter.output.sequences,
-        reference = reference
     output:
         alignment = "results/aligned.fasta"
+    params:
+        debug = '--debug' if config['verbose'] else '',
+        allParams = format_config_params('align')
     shell:
         """
         augur align \
-            --sequences {input.sequences} \
             --reference-sequence {input.reference} \
+            --sequences {input.sequences} \
             --output {output.alignment} \
-            --fill-gaps
+            {params.debug} \
+            {params.allParams}
+            """
+
+rule mask:
+    message:
+        """
+        Mask bases in alignment by converting `-` to `N`
+        """
+    input:
+        alignment = rules.align.output.alignment
+    output:
+        alignment = "results/masked_alignment.fasta"
+    params:
+        allParams = format_config_params('mask')
+    shell:
+        """
+        python3 helper_scripts/mask-alignment.py \
+            --alignment {input.alignment} \
+            --output {output.alignment} \
+            {params.allParams}
         """
 
 rule tree:
     message: "Building tree"
     input:
-        alignment = rules.align.output.alignment
+        alignment = rules.mask.output.alignment
     output:
         tree = "results/tree_raw.nwk"
+    params:
+        allParams = format_config_params('tree')
     shell:
         """
         augur tree \
             --alignment {input.alignment} \
-            --output {output.tree}
-        """
-
+            --output {output.tree} \
+            {params.allParams}
+            """
 rule refine:
     message:
         """
         Refining tree
-          - estimate timetree
-          - use {params.coalescent} coalescent timescale
-          - estimate {params.date_inference} node dates
-          - filter tips more than {params.clock_filter_iqd} IQDs from clock expectation
+          - refining branch lengths
+          - [if selected] estimating treetime 
         """
     input:
+        alignment = rules.mask.output,
+        metadata = input_metadata,
         tree = rules.tree.output.tree,
-        alignment = rules.align.output,
-        metadata = input_metadata
     output:
+        branch_lengths = "results/branch_lengths.json",
         tree = "results/tree.nwk",
-        node_data = "results/branch_lengths.json"
     params:
-        coalescent = "opt",
-        date_inference = "marginal",
-        clock_filter_iqd = 4
+        allParams = format_config_params('refine')
     shell:
         """
         augur refine \
@@ -118,66 +193,64 @@ rule refine:
             --alignment {input.alignment} \
             --metadata {input.metadata} \
             --output-tree {output.tree} \
-            --output-node-data {output.node_data} \
-            --timetree \
-            --coalescent {params.coalescent} \
-            --date-confidence \
-            --date-inference {params.date_inference} \
-            --clock-filter-iqd {params.clock_filter_iqd}
-        """
+            --output-node-data {output.branch_lengths} \
+            {params.allParams}
+        """ 
 
 rule ancestral:
     message: "Reconstructing ancestral sequences and mutations"
     input:
         tree = rules.refine.output.tree,
-        alignment = rules.align.output
+        alignment = rules.mask.output
     output:
-        node_data = "results/nt_muts.json"
+        nt_muts = "results/nt_muts.json"
     params:
-        inference = "joint"
+        allParams = format_config_params('ancestral')
     shell:
         """
         augur ancestral \
             --tree {input.tree} \
             --alignment {input.alignment} \
-            --output-node-data {output.node_data} \
-            --inference {params.inference}
-        """
+            --output-node-data {output.nt_muts} \
+            {params.allParams}
+        """ 
 
 rule translate:
     message: "Translating amino acid sequences"
     input:
         tree = rules.refine.output.tree,
-        node_data = rules.ancestral.output.node_data,
+        nt_muts = rules.ancestral.output.nt_muts,
         reference = reference
     output:
-        node_data = "results/aa_muts.json"
+        aa_muts = "results/aa_muts.json"
+    # params:
+    #     allParams = format_config_params('translate')
     shell:
         """
         augur translate \
-            --tree {input.tree} \
-            --ancestral-sequences {input.node_data} \
+            --ancestral-sequences {input.nt_muts} \
+            --output-node-data {output.aa_muts} \
             --reference-sequence {input.reference} \
-            --output-node-data {output.node_data} \
+            --tree {input.tree} \
         """
+        # {params.allParams}
 
 rule traits:
-    message: "Inferring ancestral traits for {params.columns!s}"
+    message: "Inferring ancestral traits"
     input:
         tree = rules.refine.output.tree,
         metadata = input_metadata
     output:
-        node_data = "results/traits.json",
+        traits = "results/traits.json",
     params:
-        columns = "region country"
+        allParams = format_config_params('traits')
     shell:
         """
         augur traits \
             --tree {input.tree} \
             --metadata {input.metadata} \
-            --output-node-data {output.node_data} \
-            --columns {params.columns} \
-            --confidence
+            --output-node-data {output.traits} \
+            {params.allParams}
         """
 
 rule export:
@@ -185,27 +258,23 @@ rule export:
     input:
         tree = rules.refine.output.tree,
         metadata = input_metadata,
-        branch_lengths = rules.refine.output.node_data,
-        traits = rules.traits.output.node_data,
-        nt_muts = rules.ancestral.output.node_data,
-        aa_muts = rules.translate.output.node_data,
-        colors = colors,
-        lat_longs = lat_longs,
-        auspice_config = auspice_config
+        branch_lengths = rules.refine.output.branch_lengths,
+        traits = rules.traits.output.traits,
+        nt_muts = rules.ancestral.output.nt_muts,
+        aa_muts = rules.translate.output.aa_muts,
     output:
         auspice_json = rules.all.input.auspice_json,
+    params:
+        allParams = format_config_params('export')
     shell:
         """
         augur export v2 \
             --tree {input.tree} \
             --metadata {input.metadata} \
             --node-data {input.branch_lengths} {input.traits} {input.nt_muts} {input.aa_muts} \
-            --colors {input.colors} \
-            --lat-longs {input.lat_longs} \
-            --auspice-config {input.auspice_config} \
-            --include-root-sequence \
-            --output {output.auspice_json}
-        """
+            --output {output.auspice_json} \
+            {params.allParams}
+        """ 
 
 rule clean:
     message: "Removing directories: {params}"
