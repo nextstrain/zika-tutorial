@@ -1,4 +1,4 @@
-strain	virus	accession	date	region	country	division	city	db	segment	authors	url	title	journal	paper_url
+strain	virus	accession	date	region	country	division	location	db	segment	authors	url	title	journal	paper_url
 1_0087_PF	zika	KX447509	2013-12-XX	Oceania	French Polynesia	French Polynesia	French Polynesia	genbank	genome	Pettersson et al	https://www.ncbi.nlm.nih.gov/nuccore/KX447509	How Did Zika Virus Emerge in the Pacific Islands and Latin America?	MBio 7 (5), e01239-16 (2016)	https://www.ncbi.nlm.nih.gov/pubmed/27729507
 1_0181_PF	zika	KX447512	2013-12-XX	Oceania	French Polynesia	French Polynesia	French Polynesia	genbank	genome	Pettersson et al	https://www.ncbi.nlm.nih.gov/nuccore/KX447512	How Did Zika Virus Emerge in the Pacific Islands and Latin America?	MBio 7 (5), e01239-16 (2016)	https://www.ncbi.nlm.nih.gov/pubmed/27729507
 1_0199_PF	zika	KX447519	2013-11-XX	Oceania	French Polynesia	French Polynesia	French Polynesia	genbank	genome	Pettersson et al	https://www.ncbi.nlm.nih.gov/nuccore/KX447519	How Did Zika Virus Emerge in the Pacific Islands and Latin America?	MBio 7 (5), e01239-16 (2016)	https://www.ncbi.nlm.nih.gov/pubmed/27729507
