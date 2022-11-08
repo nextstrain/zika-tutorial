@@ -36,9 +36,8 @@ def format_flag(rule, param):
 
 def format_config_params(rule): 
     params = []
-
-    if rule not in config.keys(): ## check the rule exists in the config file
-        raise Exception("Rule %s parameters not found in config file" % rule)
+    if rule not in config.keys() or config[rule] is None: ## check the rule exists in the config file
+        return ""
 
     for param in config[rule].keys():
         if param.endswith('_FLAG'): ## format flags 
