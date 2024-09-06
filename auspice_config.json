@@ -1,0 +1,18 @@
+{
+  "title": "Your title here",
+  "maintainers": [{ "name": "Your name here", "url": "http://your-url-here" }],
+  "build_url": "",
+  "colorings": [
+    { "key": "gt", "title": "Genotype", "type": "categorical" },
+    { "key": "num_date", "title": "Collection Date", "type": "continuous" },
+    { "key": "author", "title": "Author", "type": "categorical" },
+    { "key": "region", "title": "Region", "type": "categorical" },
+    { "key": "country", "title": "Country", "type": "categorical" },
+    { "key": "division", "title": "State/Province", "type": "categorical" },
+    { "key": "location", "title": "Location/City", "type": "categorical" }
+  ],
+  "geo_resolutions": ["country", "region", "division", "location"],
+  "panels": ["tree", "map", "entropy"],
+  "display_defaults": { "map_triplicate": true },
+  "filters": ["region", "country", "division", "location", "author"]
+}
