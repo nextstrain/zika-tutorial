@@ -19,6 +19,7 @@ rule index_sequences:
         sequences = input_fasta
     output:
         sequence_index = "results/sequence_index.tsv"
+    conda: "envs/nextstrain.yaml"
     shell:
         """
         augur index \
@@ -45,6 +46,7 @@ rule filter:
         group_by = "country year month",
         sequences_per_group = 20,
         min_date = 2012
+    conda: "envs/nextstrain.yaml"
     shell:
         """
         augur filter \
@@ -69,6 +71,7 @@ rule align:
         reference = reference
     output:
         alignment = "results/aligned.fasta"
+    conda: "envs/nextstrain.yaml"
     shell:
         """
         augur align \
@@ -84,6 +87,7 @@ rule tree:
         alignment = rules.align.output.alignment
     output:
         tree = "results/tree_raw.nwk"
+    conda: "envs/nextstrain.yaml"
     shell:
         """
         augur tree \
@@ -111,6 +115,7 @@ rule refine:
         coalescent = "opt",
         date_inference = "marginal",
         clock_filter_iqd = 4
+    conda: "envs/nextstrain.yaml"
     shell:
         """
         augur refine \
@@ -135,6 +140,7 @@ rule ancestral:
         node_data = "results/nt_muts.json"
     params:
         inference = "joint"
+    conda: "envs/nextstrain.yaml"
     shell:
         """
         augur ancestral \
@@ -152,6 +158,7 @@ rule translate:
         reference = reference
     output:
         node_data = "results/aa_muts.json"
+    conda: "envs/nextstrain.yaml"
     shell:
         """
         augur translate \
@@ -170,6 +177,7 @@ rule traits:
         node_data = "results/traits.json",
     params:
         columns = "region country"
+    conda: "envs/nextstrain.yaml"
     shell:
         """
         augur traits \
@@ -194,6 +202,7 @@ rule export:
         auspice_config = auspice_config
     output:
         auspice_json = rules.all.input.auspice_json,
+    conda: "envs/nextstrain.yaml"
     shell:
         """
         augur export v2 \
