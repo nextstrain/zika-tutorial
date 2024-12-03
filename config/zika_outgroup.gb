@@ -100,9 +100,10 @@ FEATURES             Location/Qualifiers
      CDS             91..456
                      /product="capsid protein"
                      /gene="CA"
-     CDS             457..735
-                     /product="propeptide"
-                     /gene="PRO"
+     CDS             457..960
+                     /note="Modified by Nextstrain; Differs from ref"
+                     /product="precursor membrane protein"
+                     /gene="prM"
      CDS             736..960
                      /product="membrane protein"
                      /gene="MP"
