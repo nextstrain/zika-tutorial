@@ -29,6 +29,11 @@
       "key": "region",
       "title": "Region",
       "type": "categorical"
+    },
+    {
+      "key": "snvs",
+      "title": "SNVs",
+      "type": "continuous"
     }
   ],
   "geo_resolutions": [
