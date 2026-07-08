@@ -54,7 +54,7 @@ rule filter:
             --sequence-index {input.sequence_index} \
             --metadata {input.metadata} \
             --exclude {input.exclude} \
-            --output {output.sequences} \
+            --output-sequences {output.sequences} \
             --group-by {params.group_by} \
             --sequences-per-group {params.sequences_per_group} \
             --min-date {params.min_date}
