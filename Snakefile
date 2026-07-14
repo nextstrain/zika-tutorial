@@ -54,7 +54,7 @@ rule filter:
             --sequence-index {input.sequence_index} \
             --metadata {input.metadata} \
             --exclude {input.exclude} \
-            --output {output.sequences} \
+            --output-sequences {output.sequences} \
             --group-by {params.group_by} \
             --sequences-per-group {params.sequences_per_group} \
             --min-date {params.min_date}
@@ -137,7 +137,8 @@ rule ancestral:
         tree = rules.refine.output.tree,
         alignment = rules.align.output
     output:
-        node_data = "results/nt_muts.json"
+        node_data = "results/nt_muts.json",
+        alignment = "results/nt_sequences.fasta",
     params:
         inference = "joint"
     conda: "envs/nextstrain.yaml"
@@ -147,6 +148,7 @@ rule ancestral:
             --tree {input.tree} \
             --alignment {input.alignment} \
             --output-node-data {output.node_data} \
+            --output-sequences {output.alignment} \
             --inference {params.inference}
         """
 
@@ -157,8 +159,11 @@ rule translate:
         node_data = rules.ancestral.output.node_data,
         reference = reference
     output:
-        node_data = "results/aa_muts.json"
+        node_data = "results/aa_muts.json",
+        ENV_alignment = "results/aa_sequences/ENV.fasta",
     conda: "envs/nextstrain.yaml"
+    params:
+        alignments="results/aa_sequences/%GENE.fasta",
     shell:
         """
         augur translate \
@@ -166,6 +171,63 @@ rule translate:
             --ancestral-sequences {input.node_data} \
             --reference-sequence {input.reference} \
             --output-node-data {output.node_data} \
+            --alignment-output {params.alignments:q}
+        """
+
+rule nucleotide_distances:
+    input:
+        tree = "results/tree.nwk",
+        alignments = [
+            "results/nt_sequences.fasta",
+        ],
+        distance_maps = [
+            "config/distance_map_nucleotides.json",
+        ],
+    output:
+        node_data = "results/distances_nucleotides.json",
+    conda: "envs/nextstrain.yaml"
+    params:
+        gene_names = "nuc",
+        attribute_name = "snvs",
+        compare_to = "root",
+    shell:
+        """
+        augur distance \
+            --tree {input.tree} \
+            --alignment {input.alignments} \
+            --map {input.distance_maps} \
+            --gene-names {params.gene_names} \
+            --attribute-name {params.attribute_name} \
+            --compare-to {params.compare_to} \
+            --output {output.node_data}
+        """
+
+rule amino_acid_distances:
+    input:
+        tree = "results/tree.nwk",
+        alignments = [
+            "results/aa_sequences/ENV.fasta",
+        ],
+        distance_maps = [
+            "config/distance_map_aa.json",
+        ],
+    output:
+        node_data = "results/distances_aa.json",
+    conda: "envs/nextstrain.yaml"
+    params:
+        gene_names = "ENV",
+        attribute_name = "ENV",
+        compare_to = "root",
+    shell:
+        """
+        augur distance \
+            --tree {input.tree} \
+            --alignment {input.alignments} \
+            --map {input.distance_maps} \
+            --gene-names {params.gene_names} \
+            --attribute-name {params.attribute_name} \
+            --compare-to {params.compare_to} \
+            --output {output.node_data}
         """
 
 rule traits:
@@ -197,6 +259,8 @@ rule export:
         traits = rules.traits.output.node_data,
         nt_muts = rules.ancestral.output.node_data,
         aa_muts = rules.translate.output.node_data,
+        nucleotide_distances = rules.nucleotide_distances.output.node_data,
+        aa_distances = rules.amino_acid_distances.output.node_data,
         colors = colors,
         lat_longs = lat_longs,
         auspice_config = auspice_config
@@ -208,7 +272,7 @@ rule export:
         augur export v2 \
             --tree {input.tree} \
             --metadata {input.metadata} \
-            --node-data {input.branch_lengths} {input.traits} {input.nt_muts} {input.aa_muts} \
+            --node-data {input.branch_lengths} {input.traits} {input.nt_muts} {input.aa_muts} {input.nucleotide_distances} {input.aa_distances} \
             --colors {input.colors} \
             --lat-longs {input.lat_longs} \
             --auspice-config {input.auspice_config} \

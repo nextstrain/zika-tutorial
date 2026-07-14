@@ -29,6 +29,16 @@
       "key": "region",
       "title": "Region",
       "type": "categorical"
+    },
+    {
+      "key": "snvs",
+      "title": "nucleotide mutations",
+      "type": "continuous"
+    },
+    {
+      "key": "ENV",
+      "title": "ENV mutations",
+      "type": "continuous"
     }
   ],
   "geo_resolutions": [

@@ -1,0 +1,7 @@
+{
+    "name": "amino acid Hamming distance",
+    "default": 1,
+    "ignored_characters": ["-", "X"],
+    "output_type": "integer",
+    "map": {}
+}
