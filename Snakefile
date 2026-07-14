@@ -159,8 +159,11 @@ rule translate:
         node_data = rules.ancestral.output.node_data,
         reference = reference
     output:
-        node_data = "results/aa_muts.json"
+        node_data = "results/aa_muts.json",
+        ENV_alignment = "results/aa_sequences/ENV.fasta",
     conda: "envs/nextstrain.yaml"
+    params:
+        alignments="results/aa_sequences/%GENE.fasta",
     shell:
         """
         augur translate \
@@ -168,15 +171,20 @@ rule translate:
             --ancestral-sequences {input.node_data} \
             --reference-sequence {input.reference} \
             --output-node-data {output.node_data} \
+            --alignment-output {params.alignments:q}
         """
 
-rule distances:
+rule nucleotide_distances:
     input:
         tree = "results/tree.nwk",
-        alignment = "results/nt_sequences.fasta",
-        distance_map = "config/distance_map_nucleotides.json",
+        alignments = [
+            "results/nt_sequences.fasta",
+        ],
+        distance_maps = [
+            "config/distance_map_nucleotides.json",
+        ],
     output:
-        node_data = "results/distances.json",
+        node_data = "results/distances_nucleotides.json",
     conda: "envs/nextstrain.yaml"
     params:
         gene_names = "nuc",
@@ -186,8 +194,36 @@ rule distances:
         """
         augur distance \
             --tree {input.tree} \
-            --alignment {input.alignment} \
-            --map {input.distance_map} \
+            --alignment {input.alignments} \
+            --map {input.distance_maps} \
+            --gene-names {params.gene_names} \
+            --attribute-name {params.attribute_name} \
+            --compare-to {params.compare_to} \
+            --output {output.node_data}
+        """
+
+rule amino_acid_distances:
+    input:
+        tree = "results/tree.nwk",
+        alignments = [
+            "results/aa_sequences/ENV.fasta",
+        ],
+        distance_maps = [
+            "config/distance_map_aa.json",
+        ],
+    output:
+        node_data = "results/distances_aa.json",
+    conda: "envs/nextstrain.yaml"
+    params:
+        gene_names = "ENV",
+        attribute_name = "ENV",
+        compare_to = "root",
+    shell:
+        """
+        augur distance \
+            --tree {input.tree} \
+            --alignment {input.alignments} \
+            --map {input.distance_maps} \
             --gene-names {params.gene_names} \
             --attribute-name {params.attribute_name} \
             --compare-to {params.compare_to} \
@@ -223,7 +259,8 @@ rule export:
         traits = rules.traits.output.node_data,
         nt_muts = rules.ancestral.output.node_data,
         aa_muts = rules.translate.output.node_data,
-        distances = rules.distances.output.node_data,
+        nucleotide_distances = rules.nucleotide_distances.output.node_data,
+        aa_distances = rules.amino_acid_distances.output.node_data,
         colors = colors,
         lat_longs = lat_longs,
         auspice_config = auspice_config
@@ -235,7 +272,7 @@ rule export:
         augur export v2 \
             --tree {input.tree} \
             --metadata {input.metadata} \
-            --node-data {input.branch_lengths} {input.traits} {input.nt_muts} {input.aa_muts} {input.distances} \
+            --node-data {input.branch_lengths} {input.traits} {input.nt_muts} {input.aa_muts} {input.nucleotide_distances} {input.aa_distances} \
             --colors {input.colors} \
             --lat-longs {input.lat_longs} \
             --auspice-config {input.auspice_config} \

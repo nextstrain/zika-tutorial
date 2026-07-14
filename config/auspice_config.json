@@ -32,7 +32,12 @@
     },
     {
       "key": "snvs",
-      "title": "SNVs",
+      "title": "nucleotide mutations",
+      "type": "continuous"
+    },
+    {
+      "key": "ENV",
+      "title": "ENV mutations",
       "type": "continuous"
     }
   ],
