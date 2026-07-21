@@ -1,6 +1,7 @@
 rule all:
     input:
         auspice_json = "auspice/zika.json",
+        pairwise_nucleotide_distances = "results/distances_pairwise_nucleotides.tsv",
 
 input_fasta = "data/sequences.fasta",
 input_metadata = "data/metadata.tsv",
@@ -200,6 +201,36 @@ rule nucleotide_distances:
             --attribute-name {params.attribute_name} \
             --compare-to {params.compare_to} \
             --output {output.node_data}
+        """
+
+rule pairwise_nucleotide_distances:
+    input:
+        tree = "results/tree.nwk",
+        alignments = [
+            "results/aligned.fasta",
+        ],
+        distance_maps = [
+            "config/distance_map_nucleotides.json",
+        ],
+    output:
+        node_data = "results/distances_pairwise_nucleotides.json",
+        edge_list = "results/distances_pairwise_nucleotides.tsv",
+    conda: "envs/nextstrain.yaml"
+    params:
+        gene_names = "nuc",
+        attribute_name = "snvs",
+        compare_to = "pairwise",
+    shell:
+        """
+        augur distance \
+            --tree {input.tree} \
+            --alignment {input.alignments} \
+            --map {input.distance_maps} \
+            --gene-names {params.gene_names} \
+            --attribute-name {params.attribute_name} \
+            --compare-to {params.compare_to} \
+            --output {output.node_data} \
+            --output-edge-list {output.edge_list}
         """
 
 rule amino_acid_distances:
