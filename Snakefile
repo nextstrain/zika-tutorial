@@ -181,7 +181,7 @@ rule nucleotide_distances:
             "results/nt_sequences.fasta",
         ],
         distance_maps = [
-            "config/distance_map_nucleotides.json",
+            f"{workflow.basedir}/config/distance_map_nucleotides.json",
         ],
     output:
         node_data = "results/distances_nucleotides.json",
@@ -209,7 +209,7 @@ rule amino_acid_distances:
             "results/aa_sequences/ENV.fasta",
         ],
         distance_maps = [
-            "config/distance_map_aa.json",
+            f"{workflow.basedir}/config/distance_map_aa.json",
         ],
     output:
         node_data = "results/distances_aa.json",
