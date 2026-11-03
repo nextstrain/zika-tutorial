@@ -2,13 +2,13 @@ rule all:
     input:
         auspice_json = "auspice/zika.json",
 
-input_fasta = "data/sequences.fasta",
-input_metadata = "data/metadata.tsv",
-dropped_strains = "config/dropped_strains.txt",
-reference = "config/zika_outgroup.gb",
-colors = "config/colors.tsv",
-lat_longs = "config/lat_longs.tsv",
-auspice_config = "config/auspice_config.json"
+input_fasta = f"{workflow.basedir}/data/sequences.fasta"
+input_metadata = f"{workflow.basedir}/data/metadata.tsv"
+dropped_strains = f"{workflow.basedir}/config/dropped_strains.txt"
+reference = f"{workflow.basedir}/config/zika_outgroup.gb"
+colors = f"{workflow.basedir}/config/colors.tsv"
+lat_longs = f"{workflow.basedir}/config/lat_longs.tsv"
+auspice_config = f"{workflow.basedir}/config/auspice_config.json"
 
 rule index_sequences:
     message:
