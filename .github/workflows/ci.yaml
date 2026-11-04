@@ -1,0 +1,66 @@
+name: CI
+
+defaults:
+  run:
+    # This is the same as GitHub Action's `bash` keyword as of 20 June 2023:
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsshell
+    #
+    # Completely spelling it out here so that GitHub can't change it out from under us
+    # and we don't have to refer to the docs to know the expected behavior.
+    shell: bash --noprofile --norc -eo pipefail {0}
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # Not using pathogen-repo-ci because this repo does not follow the traditional directory structure
+  nextstrain-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: nextstrain/.github/actions/setup-nextstrain-cli@master
+        with:
+          runtime: docker
+
+      - uses: actions/checkout@v7
+
+      - name: Test nextstrain build
+        run: nextstrain build .
+
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nextstrain-build-output
+          if-no-files-found: ignore
+          path: |
+            .snakemake/log/
+            auspice/
+            results/
+
+  nextstrain-run:
+    runs-on: ubuntu-latest
+    env:
+      ANALYSIS_DIR: analysis-directory
+    steps:
+      - uses: nextstrain/.github/actions/setup-nextstrain-cli@master
+        with:
+          runtime: docker
+
+      - name: Setup pathogen
+        run: nextstrain setup zika-tutorial@${{ github.sha }}
+
+      - name: Test nextstrain run
+        run: nextstrain run zika-tutorial phylogenetic ${{ env.ANALYSIS_DIR }}
+
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nextstrain-run-output
+          if-no-files-found: ignore
+          path: |
+            ${{ env.ANALYSIS_DIR}}/.snakemake/log/
+            ${{ env.ANALYSIS_DIR}}/auspice/
+            ${{ env.ANALYSIS_DIR}}/results/
